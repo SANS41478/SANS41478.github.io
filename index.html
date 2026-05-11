@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老铛的创世区块 | Laodang's Genesis Block</title>
+<meta name="description" content="老铛的个人网站 — 构建、记录、连接">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================================
+     Navigation
+     ============================================ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">
+      <img class="nav-brand-icon" src="icon-logo.png" alt="LD">
+      <span data-i18n="nav.brandName">老铛的创世区块</span>
+    </a>
+    <div class="nav-links" id="navDesktop">
+      <a href="index.html" class="nav-link active" data-i18n="nav.home">首页</a>
+      <a href="projects.html" class="nav-link" data-i18n="nav.projects">项目</a>
+      <a href="articles.html" class="nav-link" data-i18n="nav.articles">文章</a>
+      <a href="#contact" class="nav-link" data-i18n="nav.contact">联系</a>
+    </div>
+    <div class="nav-actions">
+      <button class="lang-toggle" id="langToggle" aria-label="Switch language">EN</button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile nav drawer -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="index.html" class="nav-link active" data-i18n="nav.home">首页</a>
+  <a href="projects.html" class="nav-link" data-i18n="nav.projects">项目</a>
+  <a href="articles.html" class="nav-link" data-i18n="nav.articles">文章</a>
+  <a href="#contact" class="nav-link" data-i18n="nav.contact">联系</a>
+</div>
+
+<!-- ============================================
+     Hero
+     ============================================ -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="hero-orb"></div>
+    <div class="hero-orb"></div>
+    <div class="hero-orb"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge" data-i18n="hero.badge">个人网站 · 2026</div>
+    <h1 class="hero-name">
+      <span class="hero-name-gradient">老铛的创世区块</span>
+    </h1>
+    <p class="hero-subtitle" data-i18n="hero.subtitle">Laodang's Genesis Block — 构建、记录、连接</p>
+    <div class="hero-actions">
+      <a href="projects.html" class="btn btn-primary btn-lg" data-i18n="hero.ctaProjects">查看项目</a>
+      <a href="#contact" class="btn btn-outline btn-lg" data-i18n="hero.ctaContact">联系我</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span class="hero-scroll-arrow"></span>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================
+     About
+     ============================================ -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label" data-i18n="about.label">关于</div>
+      <h2 class="page-title" data-i18n="about.title">每一个伟大的项目，都从一个区块开始</h2>
+    </div>
+
+    <div class="about-grid mt-6">
+      <div class="about-text reveal reveal-delay-1">
+        <p data-i18n="about.p1">你好，我是老铛。一名全栈开发者与技术创作者，专注于构建优雅、高性能的 Web 应用与工具。我相信代码不仅是功能的实现，更是思想的表达。</p>
+        <p data-i18n="about.p2">这里是我的数字花园——记录项目、分享思考、连接同路人。无论是开源工具、技术文章，还是实验性的 Side Project，每一行代码都承载着对技术的热爱。</p>
+      </div>
+
+      <div class="about-stats reveal reveal-delay-2">
+        <div class="stat-card">
+          <div class="stat-number">12+</div>
+          <div class="stat-label" data-i18n="about.stat1">开源项目</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="articleCount">2</div>
+          <div class="stat-label" data-i18n="about.stat2">技术文章</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">&infin;</div>
+          <div class="stat-label" data-i18n="about.stat3">探索精神</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">2026</div>
+          <div class="stat-label" data-i18n="about.stat4">持续构建</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================
+     Contact
+     ============================================ -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label" data-i18n="contact.label">联系</div>
+      <h2 class="page-title" data-i18n="contact.title">与我连接</h2>
+    </div>
+
+    <div class="contact-layout">
+      <!-- Contact Info -->
+      <div class="reveal reveal-delay-1">
+        <h3 class="card-title mb-4" data-i18n="contact.infoTitle">联系方式</h3>
+        <div class="contact-info-list" id="contactMethods">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Message Form -->
+      <div class="reveal reveal-delay-2">
+        <div class="message-form-card" id="messageFormCard">
+          <h3 class="card-title" data-i18n="message.title">给我留言</h3>
+          <p class="form-hint mb-4" data-i18n="message.hint">你的留言将被加密存储，仅我可见。</p>
+
+          <div class="form-group">
+            <label class="form-label" for="msgName" data-i18n="message.name">你的名字</label>
+            <input class="form-input" type="text" id="msgName" data-i18n-placeholder="message.namePlaceholder" placeholder="你的名字（选填）">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="msgEmail" data-i18n="message.email">你的邮箱</label>
+            <input class="form-input" type="email" id="msgEmail" data-i18n-placeholder="message.emailPlaceholder" placeholder="your@email.com（选填）">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="msgBody" data-i18n="message.body">留言内容</label>
+            <textarea class="form-textarea" id="msgBody" data-i18n-placeholder="message.bodyPlaceholder" placeholder="写下你想说的话..."></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-lg" style="width:100%;" id="submitBtn" data-i18n="message.submit">发送留言</button>
+          <div class="form-status" id="formStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Footer
+     ============================================ -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer-text" data-i18n="footer.text">© 2026 老铛的创世区块</p>
+    <div class="footer-links">
+      <a href="#" id="adminLink" data-i18n="footer.admin">管理留言</a>
+      <span class="text-muted">·</span>
+      <span class="text-muted" data-i18n="footer.builtWith">精心构建 · 零依赖</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     Admin Panel
+     ============================================ -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-panel-header">
+      <h2 class="admin-panel-title" data-i18n="admin.title">留言管理</h2>
+      <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close">✕</button>
+    </div>
+    <p class="admin-panel-hint" data-i18n="admin.hint">所有留言仅在你本地可见。点击右上角关闭或按 Esc。</p>
+    <div id="adminMessages"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Back to top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/common.js"></script>
+<script>
+  // Page-specific: re-render contact info on language change
+  function onLangChange() {
+    renderContactInfo('contactMethods');
+  }
+
+  // Init page-specific elements
+  document.addEventListener('DOMContentLoaded', () => {
+    renderContactInfo('contactMethods');
+    document.getElementById('articleCount').textContent = ARTICLES_INDEX.length;
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目作品 — 老铛的创世区块</title>
+<meta name="description" content="老铛的项目作品集">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================================
+     Navigation
+     ============================================ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">
+      <img class="nav-brand-icon" src="icon-logo.png" alt="LD">
+      <span data-i18n="nav.brandName">老铛的创世区块</span>
+    </a>
+    <div class="nav-links" id="navDesktop">
+      <a href="index.html" class="nav-link" data-i18n="nav.home">首页</a>
+      <a href="projects.html" class="nav-link active" data-i18n="nav.projects">项目</a>
+      <a href="articles.html" class="nav-link" data-i18n="nav.articles">文章</a>
+      <a href="index.html#contact" class="nav-link" data-i18n="nav.contact">联系</a>
+    </div>
+    <div class="nav-actions">
+      <button class="lang-toggle" id="langToggle" aria-label="Switch language">EN</button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="index.html" class="nav-link" data-i18n="nav.home">首页</a>
+  <a href="projects.html" class="nav-link active" data-i18n="nav.projects">项目</a>
+  <a href="articles.html" class="nav-link" data-i18n="nav.articles">文章</a>
+  <a href="index.html#contact" class="nav-link" data-i18n="nav.contact">联系</a>
+</div>
+
+<!-- ============================================
+     Page Header
+     ============================================ -->
+<section class="page-header">
+  <div class="container">
+    <a href="index.html" class="btn btn-ghost btn-sm mb-4" data-i18n="projects.back">← 返回首页</a>
+    <div class="reveal">
+      <div class="section-label" data-i18n="projects.label">项目作品</div>
+      <h1 class="page-title" data-i18n="projects.title">精选项目</h1>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================
+     Projects Grid
+     ============================================ -->
+<section class="section">
+  <div class="container">
+    <div class="projects-grid" id="projectsGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     Footer
+     ============================================ -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer-text" data-i18n="footer.text">© 2026 老铛的创世区块</p>
+    <div class="footer-links">
+      <a href="#" id="adminLink" data-i18n="footer.admin">管理留言</a>
+      <span class="text-muted">·</span>
+      <span class="text-muted" data-i18n="footer.builtWith">精心构建 · 零依赖</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     Admin Panel
+     ============================================ -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-panel-header">
+      <h2 class="admin-panel-title" data-i18n="admin.title">留言管理</h2>
+      <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close">✕</button>
+    </div>
+    <p class="admin-panel-hint" data-i18n="admin.hint">所有留言仅在你本地可见。点击右上角关闭或按 Esc。</p>
+    <div id="adminMessages"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/common.js"></script>
+<script>
+  function onLangChange() {
+    renderProjects('projectsGrid');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderProjects('projectsGrid');
+  });
+</script>
+
+</body>
+</html>

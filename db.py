@@ -312,6 +312,45 @@ def get_media_for_project(project_id):
     conn.close()
     return [dict(r) for r in rows]
 
+def get_media_by_id(media_id):
+    conn = get_db()
+    row = conn.execute('SELECT * FROM media WHERE id = ?', (media_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_media_by_filename(filename):
+    conn = get_db()
+    row = conn.execute('SELECT * FROM media WHERE filename = ?', (filename,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_media(media_id):
+    conn = get_db()
+    row = conn.execute('SELECT * FROM media WHERE id = ?', (media_id,)).fetchone()
+    if row:
+        conn.execute('DELETE FROM media WHERE id = ?', (media_id,))
+        conn.commit()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_media_by_article(article_id):
+    """Delete all media records AND files for an article."""
+    conn = get_db()
+    rows = conn.execute('SELECT * FROM media WHERE article_id = ?', (article_id,)).fetchall()
+    conn.execute('DELETE FROM media WHERE article_id = ?', (article_id,))
+    conn.commit()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def delete_media_by_project(project_id):
+    """Delete all media records AND files for a project."""
+    conn = get_db()
+    rows = conn.execute('SELECT * FROM media WHERE project_id = ?', (project_id,)).fetchall()
+    conn.execute('DELETE FROM media WHERE project_id = ?', (project_id,))
+    conn.commit()
+    conn.close()
+    return [dict(r) for r in rows]
+
 # ── Users / Auth ──────────────────────────────────────
 
 def get_user_by_username(username):

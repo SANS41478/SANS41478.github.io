@@ -395,11 +395,25 @@ function renderMediaGallery() {
   }).join('');
 }
 
-function deleteMedia(index) {
-  if (!confirm('确定移除这个文件吗？（不会删除服务器上的文件）')) return;
-  mediaFiles.splice(index, 1);
-  renderMediaGallery();
-  showToast('已移除', 'success');
+async function deleteMedia(index) {
+  if (!confirm('确定删除这个文件吗？将从服务器上永久删除。')) return;
+  const media = mediaFiles[index];
+  try {
+    const resp = await fetch('/api/media/' + media.filename, {
+      method: 'DELETE',
+      credentials: 'same-origin'
+    });
+    if (resp.ok) {
+      mediaFiles.splice(index, 1);
+      renderMediaGallery();
+      showToast('已从服务器删除', 'success');
+    } else {
+      const err = await resp.json();
+      showToast('删除失败: ' + (err.error || '服务器错误'), 'error');
+    }
+  } catch (e) {
+    showToast('删除失败: ' + e.message, 'error');
+  }
 }
 
 function previewMedia(url, type) {

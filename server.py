@@ -24,6 +24,8 @@ from db import (init_db, save_message, get_messages, delete_message, count_messa
                 get_projects, get_project_by_slug, get_project_by_id,
                 create_project, update_project, delete_project,
                 save_media, get_media_for_article, get_media_for_project,
+                get_media_by_id, get_media_by_filename, delete_media,
+                delete_media_by_article, delete_media_by_project,
                 get_stats)
 from auth import authenticate, check_session, logout, ensure_admin, hash_password
 
@@ -344,9 +346,14 @@ def handle_api_article_update(handler, user, article_id):
     return json_response(handler, {'ok': True})
 
 def handle_api_article_delete(handler, user, article_id):
-    """DELETE /api/articles/:id — Admin only."""
+    """DELETE /api/articles/:id — Admin only. Also deletes associated media files."""
     if not user:
         return json_response(handler, {'error': 'Unauthorized'}, 401)
+    # Clean up media files on disk
+    for m in delete_media_by_article(int(article_id)):
+        filepath = os.path.join(UPLOADS_DIR, m['filename'])
+        if os.path.isfile(filepath):
+            os.remove(filepath)
     delete_article(int(article_id))
     return json_response(handler, {'ok': True})
 
@@ -425,9 +432,14 @@ def handle_api_project_update(handler, user, project_id):
     return json_response(handler, {'ok': True})
 
 def handle_api_project_delete(handler, user, project_id):
-    """DELETE /api/projects/:id — Admin only."""
+    """DELETE /api/projects/:id — Admin only. Also deletes associated media files."""
     if not user:
         return json_response(handler, {'error': 'Unauthorized'}, 401)
+    # Clean up media files on disk
+    for m in delete_media_by_project(int(project_id)):
+        filepath = os.path.join(UPLOADS_DIR, m['filename'])
+        if os.path.isfile(filepath):
+            os.remove(filepath)
     delete_project(int(project_id))
     return json_response(handler, {'ok': True})
 
@@ -480,6 +492,21 @@ def handle_api_upload(handler, user):
         })
 
     return json_response(handler, {'ok': True, 'files': uploaded})
+
+def handle_api_media_delete(handler, user, media_id_or_name):
+    """DELETE /api/media/:id_or_filename — Admin only. Deletes file from disk and DB."""
+    if not user:
+        return json_response(handler, {'error': 'Unauthorized'}, 401)
+    media = get_media_by_id(int(media_id_or_name)) if media_id_or_name.isdigit() else get_media_by_filename(media_id_or_name)
+    if not media:
+        return json_response(handler, {'error': 'Not found'}, 404)
+    # Delete file from disk
+    filepath = os.path.join(UPLOADS_DIR, media['filename'])
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+    # Delete from DB
+    delete_media(media['id'])
+    return json_response(handler, {'ok': True})
 
 def handle_api_stats(handler, user):
     """GET /api/stats — Admin only."""
@@ -753,6 +780,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         m = re.match(r'^/api/projects/(\d+)$', path)
         if m:
             return handle_api_project_delete(self, user, m.group(1))
+        m = re.match(r'^/api/media/(.+)$', path)
+        if m:
+            return handle_api_media_delete(self, user, m.group(1))
 
         self.send_error(404)
 

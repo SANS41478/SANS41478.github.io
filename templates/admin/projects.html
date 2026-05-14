@@ -1,0 +1,99 @@
+{% extends "admin/_base.html" %}
+{% set active_page = 'projects' %}
+{% block title %}项目管理{% endblock %}
+{% block page_title %}项目管理{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h2 class="admin-card-title">所有项目 ({{ projects|length }})</h2>
+    <a href="/admin/editor?type=project" class="btn btn-primary btn-sm">🚀 添加项目</a>
+  </div>
+
+  {% if projects %}
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>项目</th>
+        <th>Slug</th>
+        <th>链接</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in projects %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-size:1.25rem;">{{ project.icon or '📦' }}</span>
+            <div>
+              <a href="/projects/{{ project.slug }}" target="_blank" style="text-decoration:none;color:hsl(0,0%,90%);font-weight:500;">
+                {{ project.name_zh }}
+              </a>
+              {% if project.tags %}
+              <div style="display:flex;gap:0.25rem;margin-top:0.125rem;">
+                {% for tag in project.tags[:3] %}
+                <span class="badge">{{ tag }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        <td style="color:hsl(0,0%,45%);font-size:0.8125rem;">{{ project.slug }}</td>
+        <td>
+          <div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+            {% if project.github_url %}
+            <a href="{{ project.github_url }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size:0.6875rem;">GitHub</a>
+            {% endif %}
+            {% if project.external_url %}
+            <a href="{{ project.external_url }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size:0.6875rem;">🔗</a>
+            {% endif %}
+          </div>
+        </td>
+        <td>
+          {% if project.published %}
+          <span class="badge badge-green">已发布</span>
+          {% else %}
+          <span class="badge badge-yellow">草稿</span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:0.375rem;">
+            <a href="/admin/editor?type=project&id={{ project.id }}" class="btn btn-secondary btn-sm">编辑</a>
+            <button class="btn btn-danger btn-sm" onclick="deleteProject({{ project.id }})">删除</button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">🚀</div>
+    <div class="empty-state-text">还没有项目，去添加第一个吧</div>
+    <a href="/admin/editor?type=project" class="btn btn-primary btn-sm mt-4">添加项目</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function deleteProject(id) {
+  if (!confirm('确定删除这个项目吗？此操作不可恢复。')) return;
+  try {
+    const resp = await fetch('/api/projects/' + id, { method: 'DELETE' });
+    if (resp.ok) {
+      showToast('已删除', 'success');
+      setTimeout(() => location.reload(), 500);
+    } else {
+      showToast('删除失败', 'error');
+    }
+  } catch (e) {
+    showToast('删除失败: ' + e.message, 'error');
+  }
+}
+</script>
+{% endblock %}

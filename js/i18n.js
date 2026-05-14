@@ -78,7 +78,7 @@ const I18N = {
     // Footer
     'footer.text': '© 2026 老铛的创世区块',
     'footer.admin': '管理留言',
-    'footer.builtWith': '精心构建 · 零依赖',
+    'footer.builtWith': '精心构建 · Python 后端驱动',
 
     // Toast
     'toast.sent': '留言已发送，感谢！',
@@ -161,7 +161,7 @@ const I18N = {
     // Footer
     'footer.text': '© 2026 Laodang\'s Genesis Block',
     'footer.admin': 'Manage Messages',
-    'footer.builtWith': 'Crafted with care · Zero dependencies',
+    'footer.builtWith': 'Crafted with care · Python-powered backend',
 
     // Toast
     'toast.sent': 'Message sent. Thank you!',

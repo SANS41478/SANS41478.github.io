@@ -1,0 +1,64 @@
+{% extends "admin/_base.html" %}
+{% set active_page = 'messages' %}
+{% block title %}留言管理{% endblock %}
+{% block page_title %}留言管理{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h2 class="admin-card-title">所有留言 ({{ messages|length }})</h2>
+    <span class="text-muted" style="font-size:0.8125rem;">仅你可见</span>
+  </div>
+
+  {% if messages %}
+  <div>
+    {% for msg in messages %}
+    <div style="background:hsl(0,0%,5%);border:1px solid hsl(0,0%,12%);border-radius:8px;padding:1rem;margin-bottom:0.75rem;" id="msg-{{ msg.id }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem;">
+        <div>
+          <strong style="font-size:0.9375rem;">{{ msg.name or '匿名' }}</strong>
+          {% if msg.email %}
+          <span style="color:hsl(0,0%,50%);font-size:0.8125rem;margin-left:0.5rem;">{{ msg.email }}</span>
+          {% endif %}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span style="font-size:0.75rem;color:hsl(0,0%,45%);">{{ msg.created_at or '' }}</span>
+          <button class="btn btn-danger btn-sm" onclick="deleteMessage({{ msg.id }})" title="删除">✕</button>
+        </div>
+      </div>
+      <div style="font-size:0.9375rem;color:hsl(0,0%,85%);line-height:1.7;white-space:pre-wrap;letter-spacing:0.03em;">{{ msg.body }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">✉️</div>
+    <div class="empty-state-text">还没有留言</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function deleteMessage(id) {
+  if (!confirm('确定删除这条留言吗？')) return;
+  try {
+    const resp = await fetch('/api/messages/' + id, { method: 'DELETE' });
+    if (resp.ok) {
+      document.getElementById('msg-' + id).remove();
+      showToast('留言已删除', 'success');
+      // Check if all gone
+      const remaining = document.querySelectorAll('[id^="msg-"]');
+      if (remaining.length === 0) {
+        location.reload();
+      }
+    } else {
+      showToast('删除失败', 'error');
+    }
+  } catch (e) {
+    showToast('删除失败: ' + e.message, 'error');
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "admin/_base.html" %}
+{% set active_page = 'dashboard' %}
+{% block title %}仪表盘{% endblock %}
+{% block page_title %}仪表盘{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;">
+  <div class="admin-card" style="text-align:center;">
+    <div style="font-size:2.5rem;font-weight:700;margin-bottom:0.25rem;">{{ stats.messages }}</div>
+    <div style="font-size:0.8125rem;color:hsl(0,0%,55%);letter-spacing:0.04em;">总留言数</div>
+  </div>
+  <div class="admin-card" style="text-align:center;">
+    <div style="font-size:2.5rem;font-weight:700;margin-bottom:0.25rem;">{{ stats.articles }}</div>
+    <div style="font-size:0.8125rem;color:hsl(0,0%,55%);letter-spacing:0.04em;">已发布文章</div>
+  </div>
+  <div class="admin-card" style="text-align:center;">
+    <div style="font-size:2.5rem;font-weight:700;margin-bottom:0.25rem;">{{ stats.projects }}</div>
+    <div style="font-size:0.8125rem;color:hsl(0,0%,55%);letter-spacing:0.04em;">已发布项目</div>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header"><h2 class="admin-card-title">快捷操作</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;">
+    <a href="/admin/messages" class="btn btn-secondary" style="justify-content:flex-start;">✉️ 查看留言</a>
+    <a href="/admin/articles" class="btn btn-secondary" style="justify-content:flex-start;">📝 管理文章</a>
+    <a href="/admin/projects" class="btn btn-secondary" style="justify-content:flex-start;">🚀 管理项目</a>
+    <a href="/admin/editor?type=article" class="btn btn-primary" style="justify-content:flex-start;">✍️ 写新文章</a>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header"><h2 class="admin-card-title">网站链接</h2></div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <a href="/" target="_blank" class="btn btn-secondary btn-sm">🏠 首页</a>
+    <a href="/projects.html" target="_blank" class="btn btn-secondary btn-sm">🚀 项目页</a>
+    <a href="/articles.html" target="_blank" class="btn btn-secondary btn-sm">📝 文章页</a>
+  </div>
+</div>
+{% endblock %}

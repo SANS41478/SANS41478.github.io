@@ -1,0 +1,18 @@
+<aside class="admin-sidebar">
+  <div class="admin-sidebar-brand">
+    <a href="/admin" style="text-decoration:none;color:inherit;">
+      <div style="font-size:1.125rem;font-weight:700;letter-spacing:0.04em;">⚡ 后台</div>
+      <div style="font-size:0.6875rem;color:hsl(0,0%,50%);margin-top:0.125rem;">老铛的创世区块</div>
+    </a>
+  </div>
+  <nav class="admin-sidebar-nav">
+    <a href="/admin" class="admin-nav-item {{ 'active' if active_page == 'dashboard' else '' }}">📊 仪表盘</a>
+    <a href="/admin/messages" class="admin-nav-item {{ 'active' if active_page == 'messages' else '' }}">✉️ 留言管理</a>
+    <a href="/admin/articles" class="admin-nav-item {{ 'active' if active_page == 'articles' else '' }}">📝 文章管理</a>
+    <a href="/admin/projects" class="admin-nav-item {{ 'active' if active_page == 'projects' else '' }}">🚀 项目管理</a>
+    <a href="/admin/editor?type=article" class="admin-nav-item {{ 'active' if active_page == 'editor' else '' }}">✍️ 写文章</a>
+  </nav>
+  <div class="admin-sidebar-footer">
+    <a href="/" target="_blank" style="color:hsl(0,0%,45%);text-decoration:none;font-size:0.75rem;">← 查看网站</a>
+  </div>
+</aside>

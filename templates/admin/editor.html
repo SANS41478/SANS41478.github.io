@@ -1,0 +1,527 @@
+{% extends "admin/_base.html" %}
+{% set active_page = 'editor' %}
+{% block title %}
+{% if editing %}编辑{% else %}新建{% endif %}
+{% endblock %}
+{% block page_title %}
+{% if editing %}编辑{% else %}新建{% endif %}文章/项目
+{% endblock %}
+
+{% block extra_head %}
+<script>
+// Markdown parser loaded via CDN
+window.MARKED_READY = false;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+  onload="window.MARKED_READY=true;window._markedReady&&window._markedReady()"></script>
+{% endblock %}
+
+{% block content %}
+<div id="editorApp">
+  <!-- Type selector (only show when creating new) -->
+  <div class="admin-card" id="typeSelector" style="display:none;">
+    <div class="admin-card-header"><h2 class="admin-card-title">选择类型</h2></div>
+    <div style="display:flex;gap:1rem;">
+      <button class="btn btn-primary" onclick="setType('article')">📝 文章</button>
+      <button class="btn btn-secondary" onclick="setType('project')">🚀 项目</button>
+    </div>
+  </div>
+
+  <!-- Main form -->
+  <div id="editorForm" style="display:none;">
+    <!-- Article fields -->
+    <div id="articleFields">
+      <div class="admin-card">
+        <div class="admin-card-header"><h2 class="admin-card-title">基本信息</h2></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Slug (URL标识)</label>
+            <input class="form-input" id="slug" placeholder="hello-world" {{ 'readonly' if editing else '' }}>
+            <div class="form-hint">英文、数字和连字符，发布后不可修改</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">状态</label>
+            <select class="form-select" id="published">
+              <option value="1">发布</option>
+              <option value="0">草稿</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">中文标题</label>
+            <input class="form-input" id="titleZh" placeholder="文章中文标题">
+          </div>
+          <div class="form-group">
+            <label class="form-label">英文标题</label>
+            <input class="form-input" id="titleEn" placeholder="Article English Title">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">中文摘要</label>
+            <textarea class="form-textarea" id="excerptZh" placeholder="简短描述，显示在文章列表中" style="min-height:3rem;"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">英文摘要</label>
+            <textarea class="form-textarea" id="excerptEn" placeholder="Brief description in English" style="min-height:3rem;"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">封面图 URL</label>
+          <input class="form-input" id="coverImage" placeholder="/uploads/xxx.jpg 或 https://...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Project fields -->
+    <div id="projectFields" style="display:none;">
+      <div class="admin-card">
+        <div class="admin-card-header"><h2 class="admin-card-title">项目信息</h2></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Slug (URL标识)</label>
+            <input class="form-input" id="projSlug" placeholder="my-project" {{ 'readonly' if editing else '' }}>
+            <div class="form-hint">英文、数字和连字符，发布后不可修改</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">图标 (Emoji)</label>
+            <input class="form-input" id="projIcon" placeholder="🚀" style="font-size:1.25rem;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">中文名称</label>
+            <input class="form-input" id="projNameZh" placeholder="项目中文名">
+          </div>
+          <div class="form-group">
+            <label class="form-label">英文名称</label>
+            <input class="form-input" id="projNameEn" placeholder="Project English Name">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">中文简介</label>
+            <textarea class="form-textarea" id="projDescZh" placeholder="简短描述" style="min-height:3rem;"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">英文简介</label>
+            <textarea class="form-textarea" id="projDescEn" placeholder="Brief description" style="min-height:3rem;"></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">GitHub 地址</label>
+            <input class="form-input" id="githubUrl" placeholder="https://github.com/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">其他外部链接</label>
+            <input class="form-input" id="externalUrl" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">标签</label>
+            <div class="tags-input-wrap" id="projTagsWrap">
+              <input class="tags-input" id="projTagsInput" placeholder="输入后回车添加...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">状态</label>
+            <select class="form-select" id="projPublished">
+              <option value="1">发布</option>
+              <option value="0">草稿</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">封面图 URL</label>
+          <input class="form-input" id="projCoverImage" placeholder="/uploads/xxx.jpg 或 https://...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Content editor -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2 class="admin-card-title">内容编辑</h2>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-secondary btn-sm" onclick="uploadMedia()">📎 上传媒体</button>
+          <button class="btn btn-secondary btn-sm" onclick="togglePreview()">👁️ 预览</button>
+        </div>
+      </div>
+
+      <!-- File upload zone -->
+      <div class="drop-zone" id="dropZone" style="display:none;">
+        <div class="drop-zone-icon">📁</div>
+        <div class="drop-zone-text">拖拽图片或视频到此处，或点击选择</div>
+        <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display:none;">
+        <div id="uploadStatus" style="margin-top:0.5rem;font-size:0.8125rem;color:hsl(0,0%,55%);"></div>
+      </div>
+
+      <!-- Uploaded media gallery -->
+      <div id="mediaGallery" class="media-grid" style="margin-bottom:1rem;"></div>
+
+      <div class="editor-layout">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="display:none;">Markdown 内容</label>
+          <textarea class="form-textarea" id="contentEditor"
+            placeholder="使用 Markdown 编写内容...&#10;&#10;## 标题&#10;&#10;正文内容...&#10;&#10;```python&#10;print('代码块')&#10;```&#10;&#10;> 引用"
+            style="min-height:400px;font-family:'SF Mono','Fira Code',monospace;font-size:0.875rem;line-height:1.7;"
+          ></textarea>
+        </div>
+        <div class="editor-preview" id="contentPreview">
+          <div style="color:hsl(0,0%,40%);text-align:center;padding:3rem 0;">点击「预览」查看渲染效果</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save -->
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+      <a href="javascript:history.back()" class="btn btn-secondary">取消</a>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveContent()">
+        {% if editing %}更新{% else %}发布{% endif %}
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── State ──
+let contentType = 'article'; // 'article' or 'project'
+let editingId = null;
+let mediaFiles = []; // Uploaded media for current session
+let projTags = [];
+let previewVisible = false;
+
+// ── Init ──
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  contentType = params.get('type') || 'article';
+  editingId = params.get('id');
+
+  if (editingId) {
+    await loadExisting(editingId);
+    document.getElementById('typeSelector').style.display = 'none';
+  } else {
+    document.getElementById('typeSelector').style.display = 'block';
+    document.querySelector('#editorForm').style.display = 'none';
+  }
+}
+
+function setType(type) {
+  contentType = type;
+  document.getElementById('typeSelector').style.display = 'none';
+  document.getElementById('editorForm').style.display = 'block';
+  showFields();
+}
+
+function showFields() {
+  document.getElementById('articleFields').style.display = contentType === 'article' ? 'block' : 'none';
+  document.getElementById('projectFields').style.display = contentType === 'project' ? 'block' : 'none';
+}
+
+// ── Load existing ──
+async function loadExisting(id) {
+  const endpoint = contentType === 'article' ? '/api/articles/' + id : '/api/projects/' + id;
+  try {
+    const resp = await fetch(endpoint);
+    const data = await resp.json();
+    const item = data.article || data.project;
+
+    if (!item) {
+      showToast('找不到该项目', 'error');
+      return;
+    }
+
+    document.getElementById('editorForm').style.display = 'block';
+    showFields();
+
+    if (contentType === 'article') {
+      document.getElementById('slug').value = item.slug || '';
+      document.getElementById('titleZh').value = item.title_zh || '';
+      document.getElementById('titleEn').value = item.title_en || '';
+      document.getElementById('excerptZh').value = item.excerpt_zh || '';
+      document.getElementById('excerptEn').value = item.excerpt_en || '';
+      document.getElementById('coverImage').value = item.cover_image || '';
+      document.getElementById('published').value = item.published ? '1' : '0';
+      document.getElementById('contentEditor').value = item.content || '';
+    } else {
+      document.getElementById('projSlug').value = item.slug || '';
+      document.getElementById('projIcon').value = item.icon || '📦';
+      document.getElementById('projNameZh').value = item.name_zh || '';
+      document.getElementById('projNameEn').value = item.name_en || '';
+      document.getElementById('projDescZh').value = item.desc_zh || '';
+      document.getElementById('projDescEn').value = item.desc_en || '';
+      document.getElementById('githubUrl').value = item.github_url || '';
+      document.getElementById('externalUrl').value = item.external_url || '';
+      document.getElementById('projCoverImage').value = item.cover_image || '';
+      document.getElementById('projPublished').value = item.published ? '1' : '0';
+      document.getElementById('contentEditor').value = item.intro_content || '';
+
+      projTags = item.tags || [];
+      renderTags();
+
+      // Load associated media
+      if (item.id) {
+        loadMedia(item.id);
+      }
+    }
+  } catch (e) {
+    showToast('加载失败: ' + e.message, 'error');
+  }
+}
+
+// ── Tags ──
+function setupTags() {
+  const input = document.getElementById('projTagsInput');
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = input.value.trim();
+        if (val && !projTags.includes(val)) {
+          projTags.push(val);
+          renderTags();
+        }
+        input.value = '';
+      }
+    });
+  }
+}
+
+function renderTags() {
+  const wrap = document.getElementById('projTagsWrap');
+  const input = document.getElementById('projTagsInput');
+  // Clear existing tags
+  wrap.querySelectorAll('.tag-item').forEach(el => el.remove());
+  // Add tags before input
+  projTags.forEach((tag, i) => {
+    const span = document.createElement('span');
+    span.className = 'tag-item';
+    span.innerHTML = tag + '<button class="tag-remove" onclick="removeTag(' + i + ')">✕</button>';
+    wrap.insertBefore(span, input);
+  });
+}
+
+function removeTag(index) {
+  projTags.splice(index, 1);
+  renderTags();
+}
+
+// ── Media Upload ──
+function uploadMedia() {
+  const dz = document.getElementById('dropZone');
+  dz.style.display = dz.style.display === 'none' ? 'block' : 'none';
+}
+
+async function loadMedia(itemId) {
+  // Not implemented in this version — media is per-session
+}
+
+function setupFileUpload() {
+  const dz = document.getElementById('dropZone');
+  const input = document.getElementById('fileInput');
+
+  dz.addEventListener('click', () => input.click());
+  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  input.addEventListener('change', () => handleFiles(input.files));
+}
+
+async function handleFiles(files) {
+  const statusEl = document.getElementById('uploadStatus');
+  for (const file of files) {
+    statusEl.textContent = '上传中: ' + file.name + '...';
+    const formData = new FormData();
+    formData.append('files', file);
+
+    try {
+      const resp = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await resp.json();
+      if (data.ok && data.files) {
+        mediaFiles = mediaFiles.concat(data.files);
+        renderMediaGallery();
+        showToast('上传成功: ' + file.name, 'success');
+      } else {
+        showToast('上传失败: ' + (data.error || 'Unknown'), 'error');
+      }
+    } catch (e) {
+      showToast('上传失败: ' + e.message, 'error');
+    }
+  }
+  statusEl.textContent = '';
+}
+
+function renderMediaGallery() {
+  const gallery = document.getElementById('mediaGallery');
+  if (mediaFiles.length === 0) {
+    gallery.innerHTML = '';
+    return;
+  }
+  gallery.innerHTML = mediaFiles.map((m, i) => {
+    if (m.type === 'image') {
+      return '<div class="media-item">' +
+        '<img src="' + m.url + '" alt="' + m.original_name + '">' +
+        '<button class="media-item-insert" onclick="insertMedia(\'' + m.url + '\',\'' + m.type + '\')">插入</button>' +
+        '<div class="media-item-name">' + m.original_name.substring(0, 15) + '</div>' +
+        '</div>';
+    } else if (m.type === 'video') {
+      return '<div class="media-item">' +
+        '<video src="' + m.url + '" muted></video>' +
+        '<button class="media-item-insert" onclick="insertMedia(\'' + m.url + '\',\'' + m.type + '\')">插入</button>' +
+        '<div class="media-item-name">' + m.original_name.substring(0, 15) + '</div>' +
+        '</div>';
+    }
+    return '';
+  }).join('');
+}
+
+function insertMedia(url, type) {
+  const editor = document.getElementById('contentEditor');
+  const cursorPos = editor.selectionStart;
+  let markdown = '';
+  if (type === 'image') {
+    markdown = '![](' + url + ')';
+  } else if (type === 'video') {
+    markdown = '<video src="' + url + '" controls style="max-width:100%;border-radius:8px;"></video>';
+  }
+  const textBefore = editor.value.substring(0, cursorPos);
+  const textAfter = editor.value.substring(cursorPos);
+  editor.value = textBefore + '\n' + markdown + '\n' + textAfter;
+  editor.focus();
+  showToast('已插入', 'success');
+}
+
+// ── Preview ──
+function togglePreview() {
+  previewVisible = !previewVisible;
+  const preview = document.getElementById('contentPreview');
+  if (previewVisible) {
+    if (window.MARKED_READY) {
+      preview.innerHTML = marked.parse(document.getElementById('contentEditor').value);
+    } else {
+      preview.innerHTML = '<div style="color:hsl(0,0%,40%);">加载 Markdown 解析器...</div>';
+      window._markedReady = () => {
+        preview.innerHTML = marked.parse(document.getElementById('contentEditor').value);
+      };
+    }
+    document.querySelector('.editor-layout').style.gridTemplateColumns = '1fr 1fr';
+  } else {
+    preview.innerHTML = '<div style="color:hsl(0,0%,40%);text-align:center;padding:3rem 0;">点击「预览」查看渲染效果</div>';
+    document.querySelector('.editor-layout').style.gridTemplateColumns = '1fr';
+  }
+}
+
+// ── Save ──
+async function saveContent() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+
+  let endpoint, method, body;
+
+  if (contentType === 'article') {
+    const slug = document.getElementById('slug').value.trim();
+    const titleZh = document.getElementById('titleZh').value.trim();
+    if (!slug || !titleZh) {
+      showToast('Slug 和标题不能为空', 'error');
+      btn.disabled = false;
+      btn.textContent = '{{ "更新" if editing else "发布" }}';
+      return;
+    }
+
+    const data = {
+      slug: slug,
+      title_zh: titleZh,
+      title_en: document.getElementById('titleEn').value.trim(),
+      content: document.getElementById('contentEditor').value,
+      excerpt_zh: document.getElementById('excerptZh').value.trim(),
+      excerpt_en: document.getElementById('excerptEn').value.trim(),
+      cover_image: document.getElementById('coverImage').value.trim(),
+      published: parseInt(document.getElementById('published').value)
+    };
+
+    if (editingId) {
+      endpoint = '/api/articles/' + editingId;
+      method = 'PUT';
+    } else {
+      endpoint = '/api/articles';
+      method = 'POST';
+    }
+    body = data;
+  } else {
+    const slug = document.getElementById('projSlug').value.trim();
+    const nameZh = document.getElementById('projNameZh').value.trim();
+    if (!slug || !nameZh) {
+      showToast('Slug 和名称不能为空', 'error');
+      btn.disabled = false;
+      btn.textContent = '{{ "更新" if editing else "发布" }}';
+      return;
+    }
+
+    const data = {
+      slug: slug,
+      name_zh: nameZh,
+      name_en: document.getElementById('projNameEn').value.trim(),
+      desc_zh: document.getElementById('projDescZh').value.trim(),
+      desc_en: document.getElementById('projDescEn').value.trim(),
+      intro_content: document.getElementById('contentEditor').value,
+      tags: projTags,
+      github_url: document.getElementById('githubUrl').value.trim(),
+      external_url: document.getElementById('externalUrl').value.trim(),
+      icon: document.getElementById('projIcon').value.trim() || '📦',
+      cover_image: document.getElementById('projCoverImage').value.trim(),
+      published: parseInt(document.getElementById('projPublished').value),
+      sort_order: 0
+    };
+
+    if (editingId) {
+      endpoint = '/api/projects/' + editingId;
+      method = 'PUT';
+    } else {
+      endpoint = '/api/projects';
+      method = 'POST';
+    }
+    body = data;
+  }
+
+  try {
+    const resp = await fetch(endpoint, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const result = await resp.json();
+    if (resp.ok) {
+      showToast('保存成功！', 'success');
+      // Redirect to management page
+      setTimeout(() => {
+        window.location.href = '/admin/' + (contentType === 'article' ? 'articles' : 'projects');
+      }, 800);
+    } else {
+      showToast('保存失败: ' + (result.error || 'Unknown'), 'error');
+    }
+  } catch (e) {
+    showToast('保存失败: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '{{ "更新" if editing else "发布" }}';
+  }
+}
+
+// ── Run ──
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  setupTags();
+  setupFileUpload();
+});
+</script>
+{% endblock %}

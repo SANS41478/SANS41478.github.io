@@ -13,9 +13,7 @@
 </head>
 <body>
 
-<!-- ============================================
-     Navigation
-     ============================================ -->
+<!-- Navigation -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
@@ -42,65 +40,44 @@
   <a href="index.html#contact" class="nav-link" data-i18n="nav.contact">联系</a>
 </div>
 
-<!-- ============================================
-     Page Header
-     ============================================ -->
+<!-- Page Header -->
 <section class="page-header">
   <div class="container">
     <a href="index.html" class="btn btn-ghost btn-sm mb-4" data-i18n="articles.back">← 返回首页</a>
     <div class="reveal">
       <div class="section-label" data-i18n="articles.label">文章</div>
       <h1 class="page-title" data-i18n="articles.title">全部文章</h1>
-      <p class="page-subtitle">技术思考、项目记录、以及一些随想。</p>
+      <p class="page-subtitle">技术思考、项目记录、以及一些随想。点击标题阅读全文。</p>
     </div>
   </div>
 </section>
 
 <div class="section-divider"></div>
 
-<!-- ============================================
-     Articles List
-     ============================================ -->
+<!-- Articles List -->
 <section class="section">
   <div class="container">
     <div class="articles-list" id="articlesList">
-      <!-- Populated by JS -->
+      <!-- Populated by JS from API -->
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     Footer
-     ============================================ -->
+<!-- Footer -->
 <footer class="footer">
   <div class="container">
     <p class="footer-text" data-i18n="footer.text">© 2026 老铛的创世区块</p>
     <div class="footer-links">
-      <a href="#" id="adminLink" data-i18n="footer.admin">管理留言</a>
+      <a href="/admin" data-i18n="footer.admin">后台管理</a>
       <span class="text-muted">·</span>
-      <span class="text-muted" data-i18n="footer.builtWith">精心构建 · 零依赖</span>
+      <span class="text-muted" data-i18n="footer.builtWith">精心构建 · Python 后端驱动</span>
     </div>
   </div>
 </footer>
 
-<!-- ============================================
-     Admin Panel
-     ============================================ -->
-<div class="admin-overlay" id="adminOverlay">
-  <div class="admin-panel">
-    <div class="admin-panel-header">
-      <h2 class="admin-panel-title" data-i18n="admin.title">留言管理</h2>
-      <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close">✕</button>
-    </div>
-    <p class="admin-panel-hint" data-i18n="admin.hint">所有留言仅在你本地可见。点击右上角关闭或按 Esc。</p>
-    <div id="adminMessages"></div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/common.js"></script>
 <script>

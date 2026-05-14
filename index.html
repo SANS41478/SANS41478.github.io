@@ -13,9 +13,7 @@
 </head>
 <body>
 
-<!-- ============================================
-     Navigation
-     ============================================ -->
+<!-- Navigation -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
@@ -43,9 +41,7 @@
   <a href="#contact" class="nav-link" data-i18n="nav.contact">联系</a>
 </div>
 
-<!-- ============================================
-     Hero
-     ============================================ -->
+<!-- Hero -->
 <section class="hero" id="hero">
   <div class="hero-bg">
     <div class="hero-orb"></div>
@@ -72,9 +68,7 @@
 
 <div class="section-divider"></div>
 
-<!-- ============================================
-     About
-     ============================================ -->
+<!-- About -->
 <section class="section" id="about">
   <div class="container">
     <div class="reveal">
@@ -112,9 +106,7 @@
 
 <div class="section-divider"></div>
 
-<!-- ============================================
-     Contact
-     ============================================ -->
+<!-- Contact -->
 <section class="section" id="contact">
   <div class="container">
     <div class="reveal">
@@ -135,7 +127,7 @@
       <div class="reveal reveal-delay-2">
         <div class="message-form-card" id="messageFormCard">
           <h3 class="card-title" data-i18n="message.title">给我留言</h3>
-          <p class="form-hint mb-4" data-i18n="message.hint">你的留言将被加密存储，仅我可见。</p>
+          <p class="form-hint mb-4" data-i18n="message.hint">你的留言仅我可见，已在服务端安全存储。</p>
 
           <div class="form-group">
             <label class="form-label" for="msgName" data-i18n="message.name">你的名字</label>
@@ -160,33 +152,17 @@
   </div>
 </section>
 
-<!-- ============================================
-     Footer
-     ============================================ -->
+<!-- Footer -->
 <footer class="footer">
   <div class="container">
     <p class="footer-text" data-i18n="footer.text">© 2026 老铛的创世区块</p>
     <div class="footer-links">
-      <a href="#" id="adminLink" data-i18n="footer.admin">管理留言</a>
+      <a href="/admin" id="adminLink" data-i18n="footer.admin">后台管理</a>
       <span class="text-muted">·</span>
-      <span class="text-muted" data-i18n="footer.builtWith">精心构建 · 零依赖</span>
+      <span class="text-muted" data-i18n="footer.builtWith">精心构建 · Python 后端驱动</span>
     </div>
   </div>
 </footer>
-
-<!-- ============================================
-     Admin Panel
-     ============================================ -->
-<div class="admin-overlay" id="adminOverlay">
-  <div class="admin-panel">
-    <div class="admin-panel-header">
-      <h2 class="admin-panel-title" data-i18n="admin.title">留言管理</h2>
-      <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close">✕</button>
-    </div>
-    <p class="admin-panel-hint" data-i18n="admin.hint">所有留言仅在你本地可见。点击右上角关闭或按 Esc。</p>
-    <div id="adminMessages"></div>
-  </div>
-</div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -195,19 +171,21 @@
 <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/common.js"></script>
 <script>
-  // Page-specific: re-render contact info on language change
   function onLangChange() {
     renderContactInfo('contactMethods');
   }
 
-  // Init page-specific elements
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     renderContactInfo('contactMethods');
-    document.getElementById('articleCount').textContent = ARTICLES_INDEX.length;
+    // Load article count from API
+    try {
+      const resp = await fetch('/api/articles');
+      const data = await resp.json();
+      document.getElementById('articleCount').textContent = (data.articles || []).length;
+    } catch {}
   });
 </script>
 

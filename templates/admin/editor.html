@@ -344,14 +344,23 @@ async function handleFiles(files) {
     formData.append('files', file);
 
     try {
-      const resp = await fetch('/api/upload', { method: 'POST', body: formData });
+      const resp = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        showToast('上传失败 HTTP ' + resp.status + ': ' + errText.substring(0, 80), 'error');
+        continue;
+      }
       const data = await resp.json();
       if (data.ok && data.files) {
         mediaFiles = mediaFiles.concat(data.files);
         renderMediaGallery();
         showToast('上传成功: ' + file.name, 'success');
       } else {
-        showToast('上传失败: ' + (data.error || 'Unknown'), 'error');
+        showToast('上传失败: ' + (data.error || '服务器未返回文件'), 'error');
       }
     } catch (e) {
       showToast('上传失败: ' + e.message, 'error');
@@ -369,19 +378,38 @@ function renderMediaGallery() {
   gallery.innerHTML = mediaFiles.map((m, i) => {
     if (m.type === 'image') {
       return '<div class="media-item">' +
-        '<img src="' + m.url + '" alt="' + m.original_name + '">' +
+        '<img src="' + m.url + '" alt="' + m.original_name + '" onclick="previewMedia(\'' + m.url + '\',\'image\')" style="cursor:pointer;">' +
         '<button class="media-item-insert" onclick="insertMedia(\'' + m.url + '\',\'' + m.type + '\')">插入</button>' +
+        '<button class="media-item-insert" style="top:0.25rem;right:3rem;" onclick="deleteMedia(' + i + ')">✕</button>' +
         '<div class="media-item-name">' + m.original_name.substring(0, 15) + '</div>' +
         '</div>';
     } else if (m.type === 'video') {
       return '<div class="media-item">' +
-        '<video src="' + m.url + '" muted></video>' +
+        '<video src="' + m.url + '" preload="metadata" onclick="previewMedia(\'' + m.url + '\',\'video\')" style="cursor:pointer;"></video>' +
         '<button class="media-item-insert" onclick="insertMedia(\'' + m.url + '\',\'' + m.type + '\')">插入</button>' +
+        '<button class="media-item-insert" style="top:0.25rem;right:3rem;" onclick="deleteMedia(' + i + ')">✕</button>' +
         '<div class="media-item-name">' + m.original_name.substring(0, 15) + '</div>' +
         '</div>';
     }
     return '';
   }).join('');
+}
+
+function deleteMedia(index) {
+  if (!confirm('确定移除这个文件吗？（不会删除服务器上的文件）')) return;
+  mediaFiles.splice(index, 1);
+  renderMediaGallery();
+  showToast('已移除', 'success');
+}
+
+function previewMedia(url, type) {
+  const w = window.open('', '_blank', 'width=800,height=600');
+  if (type === 'image') {
+    w.document.write('<img src="' + url + '" style="max-width:100%;max-height:100vh;">');
+  } else if (type === 'video') {
+    w.document.write('<video src="' + url + '" controls autoplay style="max-width:100%;max-height:100vh;"></video>');
+  }
+  w.document.title = '预览';
 }
 
 function insertMedia(url, type) {

@@ -68,8 +68,13 @@ window.MARKED_READY = false;
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">封面图 URL</label>
-          <input class="form-input" id="coverImage" placeholder="/uploads/xxx.jpg 或 https://...">
+          <label class="form-label">封面图</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input class="form-input" id="coverImage" placeholder="/uploads/xxx.jpg 或粘贴图片URL" style="flex:1;">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();document.getElementById('coverFileInput').click()">📷 上传</button>
+          </div>
+          <input type="file" id="coverFileInput" accept="image/*" style="display:none;">>
+          <div class="form-hint">直接上传或粘贴图片链接</div>
         </div>
       </div>
     </div>
@@ -135,8 +140,13 @@ window.MARKED_READY = false;
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">封面图 URL</label>
-          <input class="form-input" id="projCoverImage" placeholder="/uploads/xxx.jpg 或 https://...">
+          <label class="form-label">封面图</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input class="form-input" id="projCoverImage" placeholder="/uploads/xxx.jpg 或粘贴图片URL" style="flex:1;">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();document.getElementById('projCoverFileInput').click()">📷 上传</button>
+          </div>
+          <input type="file" id="projCoverFileInput" accept="image/*" style="display:none;" >
+          <div class="form-hint">直接上传或粘贴图片链接</div>
         </div>
       </div>
     </div>
@@ -564,6 +574,35 @@ document.addEventListener('DOMContentLoaded', () => {
   init();
   setupTags();
   setupFileUpload();
+  setupCoverUploads();
 });
+
+// ── Cover Image Upload ──
+function setupCoverUploads() {
+  const coverInput = document.getElementById('coverFileInput');
+  const projCoverInput = document.getElementById('projCoverFileInput');
+  if (coverInput) coverInput.addEventListener('change', async () => {
+    const file = coverInput.files[0];
+    if (!file) return;
+    const fd = new FormData(); fd.append('files', file);
+    try {
+      const r = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'same-origin' });
+      const d = await r.json();
+      if (d.ok && d.files) { document.getElementById('coverImage').value = d.files[0].url; showToast('封面已设置', 'success'); }
+      else showToast('上传失败', 'error');
+    } catch(e) { showToast('上传失败: ' + e.message, 'error'); }
+  });
+  if (projCoverInput) projCoverInput.addEventListener('change', async () => {
+    const file = projCoverInput.files[0];
+    if (!file) return;
+    const fd = new FormData(); fd.append('files', file);
+    try {
+      const r = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'same-origin' });
+      const d = await r.json();
+      if (d.ok && d.files) { document.getElementById('projCoverImage').value = d.files[0].url; showToast('封面已设置', 'success'); }
+      else showToast('上传失败', 'error');
+    } catch(e) { showToast('上传失败: ' + e.message, 'error'); }
+  });
+}
 </script>
 {% endblock %}

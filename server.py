@@ -44,7 +44,7 @@ UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 COOKIE_NAME = 'lb_session'
 SESSION_EXPIRY_HOURS = 24
-MAX_UPLOAD_SIZE = 100 * 1024 * 1024  # 100MB
+MAX_UPLOAD_SIZE = 200 * 1024 * 1024  # 200MB
 
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -444,52 +444,122 @@ def handle_api_project_delete(handler, user, project_id):
     return json_response(handler, {'ok': True})
 
 def handle_api_upload(handler, user):
-    """POST /api/upload — Admin only, multipart file upload."""
+    """POST /api/upload — Admin only. Streams to disk, handles large files."""
     if not user:
         return json_response(handler, {'error': 'Unauthorized'}, 401)
 
-    fields, files = parse_multipart(handler)
-    if files is None:
-        return json_response(handler, {'error': 'Invalid multipart data'}, 400)
+    content_type = handler.headers.get('Content-Type', '')
+    if 'multipart/form-data' not in content_type:
+        return json_response(handler, {'error': 'Not multipart'}, 400)
 
-    if not files:
-        return json_response(handler, {'error': 'No files uploaded'}, 400)
+    match = re.search(r'boundary=([^;]+)', content_type)
+    if not match:
+        return json_response(handler, {'error': 'No boundary'}, 400)
+    boundary = match.group(1).encode('utf-8')
+    boundary_delim = b'--' + boundary
 
+    content_length = int(handler.headers.get('Content-Length', 0))
+    if content_length > MAX_UPLOAD_SIZE:
+        return json_response(handler, {'error': f'File too large. Max {MAX_UPLOAD_SIZE // 1024 // 1024}MB'}, 413)
+
+    # Stream body to temp file, then parse chunk by chunk
+    import tempfile
+    tmp_path = None
     uploaded = []
-    for f in files:
-        # Generate unique filename
-        ext = os.path.splitext(f['filename'])[1] or ''
-        unique_name = f"{uuid_lib.uuid4().hex}{ext}"
-        filepath = os.path.join(UPLOADS_DIR, unique_name)
 
-        with open(filepath, 'wb') as fout:
-            fout.write(f['data'])
+    try:
+        # Write body to temp file in 64KB chunks
+        with tempfile.NamedTemporaryFile(delete=False, dir=UPLOADS_DIR, suffix='.tmp') as tmp:
+            tmp_path = tmp.name
+            remaining = content_length
+            while remaining > 0:
+                chunk_size = min(remaining, 65536)
+                chunk = handler.rfile.read(chunk_size)
+                if not chunk:
+                    break
+                tmp.write(chunk)
+                remaining -= len(chunk)
 
-        # Determine type
-        mime_type = f['content_type']
-        if mime_type.startswith('image/'):
-            media_type = 'image'
-        elif mime_type.startswith('video/'):
-            media_type = 'video'
-        else:
-            media_type = 'file'
+        # Parse parts: read header portion into memory, write file bodies direct to disk
+        with open(tmp_path, 'rb') as f:
+            raw = f.read()
 
-        media_id = save_media(
-            filename=unique_name,
-            original_name=f['filename'],
-            mime_type=mime_type,
-            file_size=len(f['data'])
-        )
+        for part in raw.split(boundary_delim):
+            if part in (b'', b'--', b'--\r\n'):
+                continue
+            if b'\r\n\r\n' not in part:
+                continue
 
-        uploaded.append({
-            'id': media_id,
-            'filename': unique_name,
-            'original_name': f['filename'],
-            'url': f'/uploads/{unique_name}',
-            'type': media_type,
-            'mime_type': mime_type,
-            'size': len(f['data'])
-        })
+            header_bytes, body_bytes = part.split(b'\r\n\r\n', 1)
+            # Trim trailing newline
+            if body_bytes.endswith(b'\r\n'):
+                body_bytes = body_bytes[:-2]
+
+            header_text = header_bytes.decode('utf-8', errors='replace')
+            cd = re.search(r'Content-Disposition:\s*form-data;\s*name="([^"]*)"(?:\s*;\s*filename="([^"]*)")?',
+                           header_text, re.IGNORECASE)
+            if not cd:
+                continue
+
+            field_name = cd.group(1)
+            orig_filename = cd.group(2)
+
+            if not orig_filename:
+                continue  # Skip non-file fields
+
+            ct_match = re.search(r'Content-Type:\s*([^\r\n]+)', header_text, re.IGNORECASE)
+            mime_type = ct_match.group(1).strip() if ct_match else 'application/octet-stream'
+
+            # Generate unique filename and write directly
+            ext = os.path.splitext(orig_filename)[1] or '.bin'
+            unique_name = f"{uuid_lib.uuid4().hex}{ext}"
+            filepath = os.path.join(UPLOADS_DIR, unique_name)
+
+            with open(filepath, 'wb') as fout:
+                fout.write(body_bytes)
+
+            file_size = len(body_bytes)
+
+            if mime_type.startswith('image/'):
+                media_type = 'image'
+            elif mime_type.startswith('video/'):
+                media_type = 'video'
+            else:
+                media_type = 'file'
+
+            media_id = save_media(
+                filename=unique_name,
+                original_name=orig_filename,
+                mime_type=mime_type,
+                file_size=file_size
+            )
+
+            uploaded.append({
+                'id': media_id,
+                'filename': unique_name,
+                'original_name': orig_filename,
+                'url': f'/uploads/{unique_name}',
+                'type': media_type,
+                'mime_type': mime_type,
+                'size': file_size
+            })
+
+        if not uploaded:
+            return json_response(handler, {'error': 'No files found in upload'}, 400)
+
+        return json_response(handler, {'ok': True, 'files': uploaded})
+
+    except Exception as e:
+        # Clean up any partially written files
+        for u in uploaded:
+            fp = os.path.join(UPLOADS_DIR, u['filename'])
+            if os.path.isfile(fp):
+                os.remove(fp)
+        return json_response(handler, {'error': f'Upload error: {str(e)}'}, 500)
+
+    finally:
+        if tmp_path and os.path.isfile(tmp_path):
+            os.remove(tmp_path)
 
     return json_response(handler, {'ok': True, 'files': uploaded})
 

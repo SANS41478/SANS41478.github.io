@@ -11,3 +11,19 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Database
+data/
+
+# Uploads
+uploads/
+
+# Node
+node_modules/
+package-lock.json
+package.json

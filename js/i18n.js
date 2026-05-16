@@ -21,7 +21,7 @@ const I18N = {
 
     // About
     'about.label': '关于',
-    'about.title': '每一个伟大的项目，都从一个区块开始',
+    'about.title': '老铛的创世区块',
     'about.p1': '你好，我是老铛。一名全栈开发者与技术创作者，专注于构建优雅、高性能的 Web 应用与工具。我相信代码不仅是功能的实现，更是思想的表达。',
     'about.p2': '这里是我的数字花园——记录项目、分享思考、连接同路人。无论是开源工具、技术文章，还是实验性的 Side Project，每一行代码都承载着对技术的热爱。',
     'about.stat1': '开源项目',
@@ -104,7 +104,7 @@ const I18N = {
 
     // About
     'about.label': 'About',
-    'about.title': 'Every great project starts with a genesis block',
+    'about.title': "Laodang's Genesis Block",
     'about.p1': 'Hi, I\'m Laodang. A full-stack developer and tech creator focused on building elegant, high-performance web applications and tools. I believe code is not just implementation — it\'s the expression of ideas.',
     'about.p2': 'This is my digital garden — documenting projects, sharing thoughts, connecting with fellow builders. Whether open-source tools, technical articles, or experimental side projects, every line of code carries a passion for technology.',
     'about.stat1': 'Open Source Projects',

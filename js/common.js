@@ -144,15 +144,6 @@ function initMessageForm() {
   });
 }
 
-/* ---- Admin Link (now points to /admin) ---- */
-function initAdminLink() {
-  const adminLink = document.getElementById('adminLink');
-  if (adminLink) {
-    adminLink.href = '/admin';
-    adminLink.textContent = '后台管理';
-  }
-}
-
 /* ---- Contact Info Rendering ---- */
 function renderContactInfo(containerId) {
   const container = document.getElementById(containerId);
@@ -261,5 +252,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initBackToTop();
   window._revealObserver = initScrollReveal();
   initMessageForm();
-  initAdminLink();
 });

@@ -78,18 +78,21 @@
 
     <div class="about-grid mt-6">
       <div class="about-text reveal reveal-delay-1">
-        <p data-i18n="about.p1">你好，我是老铛。一名全栈开发者与技术创作者，专注于构建优雅、高性能的 Web 应用与工具。我相信代码不仅是功能的实现，更是思想的表达。</p>
-        <p data-i18n="about.p2">这里是我的数字花园——记录项目、分享思考、连接同路人。无论是开源工具、技术文章，还是实验性的 Side Project，每一行代码都承载着对技术的热爱。</p>
+        <p>你好，这里是 LD 老铛。</p>
+        <p>目前正在 AI 与 Web3 领域持续探索与挖矿。</p>
+        <p>从网站的名字你应该已经能看出来，我是一名区块链技术与 Bitcoin 的长期信仰者。</p>
+        <p>"创世区块（Genesis Block）"这一概念，最早来源于比特币的区块链设计。它代表着一条区块链中的第一个区块，也是整个链上世界的起点。由于区块链的结构是"每一个区块都引用前一个区块的哈希值"，因此整个系统必须存在一个最初的源点。这个没有前驱区块的初始区块，便被称为"创世区块"。</p>
+        <p>而我也希望，这个网站能够成为我职业生涯与个人创造之路的「Genesis Block」。这里会记录我在 AI、Web3、技术、内容与产品方向上的持续探索，也会沉淀一些关于创造、系统、未来互联网与数字世界的思考。</p>
       </div>
 
       <div class="about-stats reveal reveal-delay-2">
         <div class="stat-card">
-          <div class="stat-number">12+</div>
-          <div class="stat-label" data-i18n="about.stat1">开源项目</div>
+          <div class="stat-number" id="projectCount">—</div>
+          <div class="stat-label">开源项目</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number" id="articleCount">2</div>
-          <div class="stat-label" data-i18n="about.stat2">技术文章</div>
+          <div class="stat-number" id="articleCount">—</div>
+          <div class="stat-label">文章</div>
         </div>
         <div class="stat-card">
           <div class="stat-number">&infin;</div>
@@ -180,11 +183,16 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     renderContactInfo('contactMethods');
-    // Load article count from API
+    // Load dynamic stats
     try {
-      const resp = await fetch('/api/articles');
-      const data = await resp.json();
-      document.getElementById('articleCount').textContent = (data.articles || []).length;
+      const [aResp, pResp] = await Promise.all([
+        fetch('/api/articles'),
+        fetch('/api/projects')
+      ]);
+      const articles = await aResp.json();
+      const projects = await pResp.json();
+      document.getElementById('articleCount').textContent = (articles.articles || []).length;
+      document.getElementById('projectCount').textContent = (projects.projects || []).length;
     } catch {}
   });
 </script>

@@ -8,8 +8,8 @@ const API_BASE = '';
 /* ---- Configuration ---- */
 const CONFIG = {
   contact: {
-    email: 'hello@example.com',
-    github: 'https://github.com/yourusername',
+    email: 'sans41478@gmail.com',
+    github: 'https://github.com/SANS41478',
     twitter: '',
     wechat: '',
     blog: '',

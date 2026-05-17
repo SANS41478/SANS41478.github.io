@@ -11,7 +11,12 @@ from auth import ensure_admin
 
 # ── Configuration ──
 ADMIN_USERNAME = os.environ.get('ADMIN_USER', 'laodang')
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASS', 'changeme')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASS')
+if not ADMIN_PASSWORD:
+    import secrets
+    ADMIN_PASSWORD = secrets.token_urlsafe(16)
+    print(f"[seed] ADMIN_PASS not set — generated random password: {ADMIN_PASSWORD}")
+    print("[seed] Set ADMIN_PASS environment variable to persist across restarts.")
 
 def seed_articles():
     """Import existing articles from markdown files."""

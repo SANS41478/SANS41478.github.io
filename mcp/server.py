@@ -15,7 +15,7 @@ from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
 # ── Configuration ─────────────────────────────────────
-SITE_URL = os.environ.get("LAODANG_SITE_URL", "http://localhost:8080")
+SITE_URL = os.environ.get("LAODANG_SITE_URL", "https://laodang.asia")
 ADMIN_USER = os.environ.get("LAODANG_ADMIN_USER", "laodang")
 ADMIN_PASS = os.environ.get("LAODANG_ADMIN_PASS", "")
 

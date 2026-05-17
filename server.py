@@ -226,7 +226,7 @@ def serve_static_file(handler, filepath):
     handler.send_header('Content-Length', file_size)
     # Cache static assets
     if mime_type.startswith(('image/', 'font/', 'text/css', 'application/javascript')):
-        handler.send_header('Cache-Control', 'public, max-age=86400')
+        handler.send_header('Cache-Control', 'public, max-age=3600')
     handler.end_headers()
 
     with open(full_path, 'rb') as f:

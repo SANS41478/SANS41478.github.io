@@ -27,6 +27,9 @@ uploads/
 .env
 .env.*
 
+# MCP config (use .mcp.json.example as template)
+.mcp.json
+
 # Node
 node_modules/
 package-lock.json

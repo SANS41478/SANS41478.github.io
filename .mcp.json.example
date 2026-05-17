@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "laodang-admin": {
+      "command": "python",
+      "args": ["mcp/server.py"],
+      "env": {
+        "LAODANG_SITE_URL": "http://8.136.58.133:8080",
+        "LAODANG_ADMIN_USER": "laodang",
+        "LAODANG_ADMIN_PASS": "你的管理员密码"
+      }
+    }
+  }
+}

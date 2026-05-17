@@ -335,14 +335,8 @@ async def list_tools() -> list[Tool]:
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # Ensure we're authenticated for admin operations
-    public_tools = {
-        "articles_list",
-        "articles_get",
-        "projects_list",
-        "projects_get",
-    }
-
-    if name not in public_tools:
+    # All tools require admin auth (so we can see unpublished drafts)
+    if True:
         authed = await ensure_auth()
         if not authed:
             return [TextContent(

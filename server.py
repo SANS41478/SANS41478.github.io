@@ -768,12 +768,12 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             return handle_admin_editor(self, user)
 
         # Public article detail pages
-        m = re.match(r'^/articles/([a-z0-9\-]+)$', path)
+        m = re.match(r'^/articles/([a-zA-Z0-9\-]+)$', path)
         if m:
             return handle_article_page(self, m.group(1))
 
         # Public project detail pages
-        m = re.match(r'^/projects/([a-z0-9\-]+)$', path)
+        m = re.match(r'^/projects/([a-zA-Z0-9\-]+)$', path)
         if m:
             return handle_project_page(self, m.group(1))
 

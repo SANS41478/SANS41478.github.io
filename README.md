@@ -46,6 +46,8 @@
 ├── js/
 │   ├── i18n.js         # 中英文词典 + 语言切换
 │   └── common.js       # 前端逻辑（API 调用、留言表单、导航）
+├── mcp/
+│   └── server.py       # MCP Server（Claude Code 后台管理）
 ├── templates/
 │   ├── admin/          # 后台模板（登录、仪表盘、编辑器等）
 │   ├── article.html    # 文章详情页模板
@@ -70,7 +72,7 @@ python server.py
 # → 后台 http://localhost:8080/admin
 ```
 
-管理员密码通过环境变量 `ADMIN_PASS` 设置，默认 `changeme`。首次运行 `seed.py` 会自动创建。
+管理员密码通过环境变量 `ADMIN_PASS` 设置。未设置时 `seed.py` 会自动生成随机密码并打印。首次运行 `seed.py` 会自动创建管理员账号。
 
 ## 部署
 
@@ -91,9 +93,24 @@ systemctl enable --now nginx
 certbot --nginx -d your-domain.com     # HTTPS
 ```
 
+## Claude Code MCP 后台管理
+
+项目包含一个 MCP Server，允许 Claude Code 直接管理网站后台：
+
+```bash
+# 安装 MCP 依赖
+pip install mcp httpx
+
+# 配置（见 .mcp.json.example）
+# 在 ~/.claude/.mcp.json 中添加 laodang-admin 服务器
+```
+
+提供的工具：留言管理、文章/项目 CRUD、网站统计。配置完成后在 Claude Code 中直接说出需求即可操作后台。
+
 ## 自定义
 
-- **联系信息** — 编辑 `js/common.js` 中的 `CONFIG.contact`
-- **项目数据** — 通过后台 `/admin` 添加编辑，或调用 `/api/projects`
+- **联系信息** — 编辑 `js/common.js` 中的 `CONFIG.contact`（邮箱、GitHub 等）
+- **项目数据** — 通过后台 `/admin` 添加编辑，或让 Claude Code 通过 MCP 操作
 - **主题** — 修改 `css/style.css` 中的 CSS 变量
 - **翻译** — 编辑 `js/i18n.js` 中的 `I18N` 词典
+- **缓存时间** — 静态资源缓存默认 1 小时，在 `server.py` 中调整 `max-age`

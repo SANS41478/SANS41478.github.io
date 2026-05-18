@@ -27,7 +27,10 @@ _client: httpx.AsyncClient | None = None
 def get_client() -> httpx.AsyncClient:
     global _client
     if _client is None:
-        _client = httpx.AsyncClient(timeout=httpx.Timeout(30.0))
+        _client = httpx.AsyncClient(
+            timeout=httpx.Timeout(30.0),
+            trust_env=False,  # 忽略 HTTP_PROXY/HTTPS_PROXY 等代理环境变量
+        )
     return _client
 
 

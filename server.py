@@ -14,6 +14,7 @@ import urllib.parse
 import traceback
 import io
 import uuid as uuid_lib
+import socketserver
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -716,6 +717,8 @@ def handle_project_page(handler, slug):
 # ── Main Request Handler ───────────────────────────────
 
 class RequestHandler(http.server.BaseHTTPRequestHandler):
+    # Timeout for stalled connections
+    timeout = 60  # seconds
 
     def log_message(self, format, *args):
         """Suppress default logging; use our own."""
@@ -731,6 +734,10 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split('?')[0]
+        # Normalize: strip trailing slash (except root), decode percent-encoding
+        if path != '/' and path.endswith('/'):
+            path = path.rstrip('/')
+        path = urllib.parse.unquote(path)
         user = get_current_user(self)
 
         # API Routes
@@ -806,6 +813,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split('?')[0]
+        if path != '/' and path.endswith('/'):
+            path = path.rstrip('/')
+        path = urllib.parse.unquote(path)
         user = get_current_user(self)
 
         # Auth
@@ -826,6 +836,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_PUT(self):
         path = self.path.split('?')[0]
+        if path != '/' and path.endswith('/'):
+            path = path.rstrip('/')
+        path = urllib.parse.unquote(path)
         user = get_current_user(self)
 
         m = re.match(r'^/api/articles/(\d+)$', path)
@@ -839,6 +852,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         path = self.path.split('?')[0]
+        if path != '/' and path.endswith('/'):
+            path = path.rstrip('/')
+        path = urllib.parse.unquote(path)
         user = get_current_user(self)
 
         m = re.match(r'^/api/messages/(\d+)$', path)
@@ -859,6 +875,11 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
 # ── Entry Point ────────────────────────────────────────
 
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    """HTTP Server that handles each request in a separate thread."""
+    daemon_threads = True
+    request_queue_size = 50
+
 def main():
     # Migration: init DB and seed if needed
     init_db()
@@ -877,7 +898,7 @@ def main():
     print(f"  Admin: http://localhost:{PORT}/admin")
     print(f"{'='*60}\n")
 
-    server = http.server.HTTPServer((HOST, PORT), RequestHandler)
+    server = ThreadingHTTPServer((HOST, PORT), RequestHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

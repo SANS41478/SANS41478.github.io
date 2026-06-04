@@ -36,6 +36,23 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 # Markdown setup
 import markdown as md_lib
 
+
+def fix_relative_paths(html_str):
+    """Rewrite relative image/video src to absolute paths for article pages."""
+    # Fix relative src in <img> and <video> tags
+    html_str = re.sub(
+        r'(<(?:img|video|source)[^>]*\bsrc=["\'])(?!https?://|/|data:)([^"\'>]+)',
+        r'\1/\2',
+        html_str
+    )
+    # Fix relative href in <a> tags for uploads
+    html_str = re.sub(
+        r'(<a[^>]*\bhref=["\'])(/uploads/)',
+        r'\1\2',
+        html_str
+    )
+    return html_str
+
 # ── Configuration ─────────────────────────────────────
 HOST = '0.0.0.0'
 PORT = int(os.environ.get('PORT', 8080))
@@ -361,6 +378,9 @@ def handle_api_article_delete(handler, user, article_id):
 def handle_api_projects_get(handler, user):
     """GET /api/projects — Public."""
     projects = get_projects(published_only=not user)
+    # Strip intro_content for list view (too heavy)
+    for p in projects:
+        p.pop('intro_content', None)
     return json_response(handler, {'projects': projects})
 
 def handle_api_projects_post(handler, user):
@@ -694,6 +714,7 @@ def handle_article_page(handler, slug):
         article['content'],
         extensions=['extra', 'codehilite', 'tables', 'fenced_code']
     )
+    content_html = fix_relative_paths(content_html)
 
     html = render_template('article.html', article=article, content_html=content_html)
     html_response(handler, html)
@@ -710,6 +731,7 @@ def handle_project_page(handler, slug):
         project['intro_content'] or '',
         extensions=['extra', 'codehilite', 'tables', 'fenced_code']
     ) if project['intro_content'] else ''
+    intro_html = fix_relative_paths(intro_html)
 
     html = render_template('project.html', project=project, intro_html=intro_html)
     html_response(handler, html)
@@ -775,12 +797,12 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             return handle_admin_editor(self, user)
 
         # Public article detail pages
-        m = re.match(r'^/articles/([a-zA-Z0-9\-]+)$', path)
+        m = re.match(r'^/articles/([^/]+)$', path)
         if m:
             return handle_article_page(self, m.group(1))
 
         # Public project detail pages
-        m = re.match(r'^/projects/([a-zA-Z0-9\-]+)$', path)
+        m = re.match(r'^/projects/([^/]+)$', path)
         if m:
             return handle_project_page(self, m.group(1))
 
